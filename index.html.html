@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f6b45">
+<title>Calculadora de Piña Mediterránea</title>
+<style>
+:root{--green:#1f6b45;--light:#f2f7f3;--dark:#173b29;--red:#b42318;--amber:#9a6700}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#eef2ef;color:#17231b}
+header{background:var(--green);color:#fff;padding:22px 18px 20px;position:sticky;top:0;z-index:2}
+header h1{font-size:21px;margin:0 0 5px} header p{margin:0;opacity:.9;font-size:13px}
+main{max-width:760px;margin:auto;padding:14px}
+.card{background:#fff;border-radius:16px;padding:17px;margin-bottom:14px;box-shadow:0 2px 10px #0000000b}
+h2{font-size:17px;margin:0 0 13px;color:var(--dark)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+label{font-size:12px;font-weight:650;color:#536158;display:block;margin-bottom:5px}
+input{width:100%;padding:12px;border:1px solid #ccd6cf;border-radius:10px;font-size:16px;background:#fff}
+button{border:0;border-radius:11px;padding:12px 15px;background:var(--green);color:#fff;font-weight:700;font-size:15px;width:100%;margin-top:5px}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metric{background:var(--light);border-radius:12px;padding:12px}
+.metric small{display:block;color:#5b675f;font-size:11px}.metric strong{display:block;font-size:20px;margin-top:4px}
+.hero{background:#e9f5ed;border:2px solid #8bc09f;text-align:center;padding:18px;border-radius:15px}
+.hero .big{font-size:31px;font-weight:800;color:var(--green)}
+.status{text-align:center;font-weight:800;padding:12px;border-radius:11px;margin-top:10px}
+.ok{background:#e8f6ec;color:#17623a}.warn{background:#fff5d9;color:#7a5700}.bad{background:#fdebea;color:#9d2119}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:8px;border-bottom:1px solid #e4e9e5;text-align:right}th:first-child,td:first-child{text-align:left}
+.note{font-size:12px;color:#66736b;line-height:1.45}.full{grid-column:1/-1}
+@media(max-width:520px){.grid,.results{grid-template-columns:1fr 1fr}.metric strong{font-size:18px}}
+</style>
+</head>
+<body>
+<header><h1>Calculadora de Piña Mediterránea</h1><p>Piña fresca → piñón blanco · cálculo de compra y rentabilidad</p></header>
+<main>
+<section class="card">
+<h2>Datos de la partida</h2>
+<div class="grid">
+<div><label>Precio compra piña (€/kg)</label><input id="buy" type="number" step="0.01" value="1.72"></div>
+<div><label>Rendimiento piñón blanco (%)</label><input id="yield" type="number" step="0.01" value="2.20"></div>
+<div><label>Precio venta piñón (€/kg)</label><input id="sale" type="number" step="0.01" value="68.25"></div>
+<div><label>Humedad (%)</label><input id="moist" type="number" step="0.1" value="30"></div>
+<div><label>Cáscaras (%)</label><input id="shell" type="number" step="0.1" value="60"></div>
+<div><label>Precio cáscaras (€/kg)</label><input id="shellPrice" type="number" step="0.01" value="0.15"></div>
+<div><label>Mermas (%)</label><input id="loss" type="number" step="0.1" value="6"></div>
+<div><label>Coste transformación (€/kg)</label><input id="process" type="number" step="0.01" value="0.10"></div>
+</div>
+<p class="note">Los cálculos se realizan sobre una base de 100 kg de piña fresca. Los valores son editables para cada partida. Los resultados se actualizan automáticamente.</p>
+<button id="calcButton" type="button">Calcular</button>
+</section>
+
+<section class="card">
+<h2>Resultado de la partida</h2>
+<div id="balanceNote" class="note"></div>
+<div class="hero"><div>Precio máximo de compra para no perder dinero</div><div class="big" id="maxBuy">—</div><div class="note">€/kg de piña fresca</div></div>
+<div id="status" class="status">—</div>
+<br>
+<div class="results">
+<div class="metric"><small>Piñón blanco / 100 kg</small><strong id="kgWhite">—</strong></div>
+<div class="metric"><small>Ingreso piñón</small><strong id="revWhite">—</strong></div>
+<div class="metric"><small>Ingreso cáscaras</small><strong id="revShell">—</strong></div>
+<div class="metric"><small>Ingresos totales</small><strong id="revenue">—</strong></div>
+<div class="metric"><small>Coste piña</small><strong id="costPine">—</strong></div>
+<div class="metric"><small>Transformación</small><strong id="costProc">—</strong></div>
+<div class="metric"><small>Resultado / 100 kg</small><strong id="result100">—</strong></div>
+<div class="metric"><small>Resultado / tonelada</small><strong id="resultT">—</strong></div>
+<div class="metric"><small>Materia seca / 100 kg</small><strong id="dry">—</strong></div>
+<div class="metric"><small>Rendimiento sobre seco</small><strong id="dryYield">—</strong></div>
+</div>
+</section>
+
+<section class="card">
+<h2>Rendimiento mínimo necesario</h2>
+<div class="hero"><div>Para cubrir el precio actual de la piña</div><div class="big" id="minYield">—</div><div class="note">% de piñón blanco</div></div>
+<p class="note">Es el rendimiento de equilibrio: por debajo, la partida pierde dinero con los parámetros introducidos.</p>
+</section>
+
+<section class="card">
+<h2>Escenarios de rendimiento</h2>
+<table><thead><tr><th>Rendimiento</th><th>Precio máx. piña</th><th>Resultado si compras al precio actual</th></tr></thead>
+<tbody id="scenarios"></tbody></table>
+</section>
+
+<section class="card">
+<h2>Control del balance</h2>
+<div id="balance" class="note"></div>
+</section>
+</main>
+<script>
+const money=n=>new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR',maximumFractionDigits:2}).format(n);
+const num=(x,d=2)=>Number(x).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+const val=id=>{const x=parseFloat(String(document.getElementById(id).value).replace(',','.'));return Number.isFinite(x)?x:0;};
+function calc(){
+ const buy=val('buy'),yPct=val('yield'),y=yPct/100,sale=val('sale');
+ const moistPct=val('moist'),shellPct=val('shell'),shell=shellPct/100;
+ const shellPrice=val('shellPrice'),lossPct=val('loss'),process=val('process');
+ const kgWhite=100*y,kgShell=100*shell,kgDry=100*(1-moistPct/100);
+ const revWhite=kgWhite*sale,revShell=kgShell*shellPrice,revenue=revWhite+revShell;
+ const costPine=100*buy,costProcess=100*process,result=revenue-costPine-costProcess;
+ const maxBuy=(revenue-costProcess)/100;
+ const minYieldPct=Math.max(0,(costPine+costProcess-revShell)/sale);
+ const dryYield=kgDry>0?kgWhite/kgDry*100:0;
+ const totalPct=yPct+moistPct+shellPct+lossPct,unassigned=100-totalPct;
+ document.getElementById('maxBuy').textContent=money(maxBuy);
+ document.getElementById('kgWhite').textContent=num(kgWhite)+' kg';
+ document.getElementById('revWhite').textContent=money(revWhite);
+ document.getElementById('revShell').textContent=money(revShell);
+ document.getElementById('revenue').textContent=money(revenue);
+ document.getElementById('costPine').textContent=money(costPine);
+ document.getElementById('costProc').textContent=money(costProcess);
+ document.getElementById('result100').textContent=money(result);
+ document.getElementById('resultT').textContent=money(result*10);
+ document.getElementById('dry').textContent=num(kgDry)+' kg';
+ document.getElementById('dryYield').textContent=num(dryYield)+' %';
+ document.getElementById('minYield').textContent=num(minYieldPct)+' %';
+ const status=document.getElementById('status');
+ status.className='status '+(result>0.005?'ok':result<-0.005?'bad':'warn');
+ status.textContent=result>0.005?'PARTIDA RENTABLE':result<-0.005?'PARTIDA CON PÉRDIDA':'PUNTO DE EQUILIBRIO';
+ document.getElementById('balanceNote').textContent=`Base: 100 kg de piña fresca · ${num(kgWhite)} kg de piñón blanco · ${num(kgShell)} kg de cáscaras.`;
+ document.getElementById('balance').innerHTML=Math.abs(unassigned)<0.05
+ ?`Composición: ${num(yPct)} % piñón + ${num(moistPct)} % humedad + ${num(shellPct)} % cáscaras + ${num(lossPct)} % mermas = <b>100 %</b>.`
+ :`Composición: ${num(yPct)} % piñón + ${num(moistPct)} % humedad + ${num(shellPct)} % cáscaras + ${num(lossPct)} % mermas = <b>${num(totalPct)} %</b>. Quedan <b>${num(unassigned)} puntos</b> sin asignar.`;
+ const scenarios=[1.4,1.5,1.75,2,2.2,2.5,2.75,3,3.5,4];
+ document.getElementById('scenarios').innerHTML=scenarios.map(p=>{
+  const rev=100*(p/100)*sale+revShell,mx=(rev-costProcess)/100,res=rev-costPine-costProcess;
+  return `<tr><td>${num(p)} %</td><td>${money(mx)}</td><td>${money(res)}</td></tr>`;
+ }).join('');
+}
+document.querySelectorAll('input').forEach(el=>{el.addEventListener('input',calc);el.addEventListener('change',calc);});
+document.getElementById('calcButton').addEventListener('click',calc);
+calc();
+</script>
+</body></html>
